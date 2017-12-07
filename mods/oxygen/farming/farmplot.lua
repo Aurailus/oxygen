@@ -52,6 +52,10 @@ local farmplot = {
 			{-0.1875, -0.5, -0.375, -0.1875, 0.25, 0.375}, -- plant_p4
 		}
 	},
+  collision_box = {
+      type = "fixed",
+      fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
+  },
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		local inv = meta:get_inventory()
@@ -147,6 +151,39 @@ function farming.register_crop(name, crop_definitions)
 end
 
 minetest.register_abm({
+	label = "farming:farmplot_consume",
+	nodenames = "group:farmplot",
+	interval = 1,
+	chance = 1,
+	catch_up = false,
+	action = function(pos)
+		local meta = minetest.get_meta(pos)
+		if meta:get_float("fertilizer") == 100 then return false end
+		local positions = {
+			vector.new(pos.x - 1, pos.y, pos.z),
+			vector.new(pos.x, pos.y, pos.z - 1),
+			vector.new(pos.x + 1, pos.y, pos.z),
+			vector.new(pos.x, pos.y, pos.z + 1)
+		}
+		for i = 1, #positions do
+			local position = positions[i]
+			local node = minetest.get_node(position)
+			local iterations = 0
+			if node.name == "farming:fertilizer_bin" then
+				while meta:get_float("fertilizer") < 100 and node.param2 > 0 and iterations < 4 do
+					meta:set_float("fertilizer", meta:get_float("fertilizer") + 1)
+					node.param2 = node.param2 - 1
+					iterations = iterations + 1
+				end
+				minetest.swap_node(position, node)
+				if meta:get_float("fertilizer") >= 100 then break end
+			end
+		end
+		minetest.get_meta(pos):set_string("formspec", gen_formspec(pos))
+	end,
+})
+
+minetest.register_abm({
 	label = "farming:farmplot_updates",
 	nodenames = "group:farmplot",
 	interval = 2,
@@ -184,14 +221,4 @@ minetest.register_abm({
 			minetest.swap_node(pos, {name = projected_name})
 		end
 	end,
-})
-
-farming.register_crop("cotton", {
-	stages = 6,
-	texture = "farming_crop_cotton",
-	-- growth_rate = math.floor(300 / 6),
-	growth_rate = 1,
-			--ABM Ticks till stage update
-	drop = "farming:cotton_ball",
-	drop_count = {1, 3}
 })
