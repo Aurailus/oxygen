@@ -7,6 +7,7 @@ dofile(path .. "/nodes.lua")
 dofile(path .. "/extruders.lua")
 
 minetest.register_on_joinplayer(function (player)
+	player:set_attribute("oxytimeout", 4)
 	player:set_sky("#66552a", "plain", {}, true)
 	player:set_clouds({color = "#595752"})
 	player:set_attribute("mask", player:hud_add({

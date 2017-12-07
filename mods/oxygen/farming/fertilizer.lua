@@ -51,12 +51,12 @@ farming.fertilizable["farming:fertilizer_bin"] = function(nodepos)
   return false
 end
 
-farming.fertilizable["farm_plot"] = function(nodepos)
-  particles(pos)
-  local meta = minetest.get_meta(nodepos)
-  meta:set_int("growth_tick", meta:get_int("growth_tick") + 120)
-  return true
-end
+-- farming.fertilizable["farm_plot"] = function(nodepos)
+--   particles(pos)
+--   local meta = minetest.get_meta(nodepos)
+--   meta:set_int("growth_tick", meta:get_int("growth_tick") + 120)
+--   return true
+-- end
 
 minetest.register_craft({
   output = "farming:fertilizer",

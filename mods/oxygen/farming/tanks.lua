@@ -34,6 +34,10 @@ minetest.register_node("farming:fertilizer_bin", {
     end,
 })
 
+minetest.override_item("bucket:bucket_empty", {
+    stack_max = 1,
+})
+
 minetest.register_node("farming:water_tank", {
     description = "Water Tank",
     tiles = {
@@ -46,7 +50,7 @@ minetest.register_node("farming:water_tank", {
     },
     drawtype = "glasslike_framed",
     paramtype2 = "glasslikeliquidlevel",
-    special_tiles = {"farming_fertilizer_block.png"},
+    special_tiles = {"default_water.png"},
     sunlight_propagates = true,
     groups = {cracky = 3, oddly_breakable_by_hand = 3},
     sounds = default.node_sound_defaults(),
@@ -55,7 +59,9 @@ minetest.register_node("farming:water_tank", {
             if node.param2 < 60 then
                 node.param2 = node.param2 + 4
                 minetest.swap_node(pos, node)
-                user:set_wielded_item("bucket:bucket_empty")
+                minetest.after(0, function(user) -- If anyone knows why this has to be like this, tell me!
+                    user:get_inventory():set_stack("main", user:get_wield_index(), "bucket:bucket_empty")
+                end, user)
             end
         end
     end,

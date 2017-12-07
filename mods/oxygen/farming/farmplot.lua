@@ -158,25 +158,35 @@ minetest.register_abm({
 	catch_up = false,
 	action = function(pos)
 		local meta = minetest.get_meta(pos)
-		if meta:get_float("fertilizer") == 100 then return false end
+		if meta:get_float("fertilizer") >= 100 and meta:get_float("water") >= 100 then return false end
 		local positions = {
 			vector.new(pos.x - 1, pos.y, pos.z),
 			vector.new(pos.x, pos.y, pos.z - 1),
 			vector.new(pos.x + 1, pos.y, pos.z),
 			vector.new(pos.x, pos.y, pos.z + 1)
 		}
+		meta:set_float("fertilizer", math.max(meta:get_float("fertilizer") - 0.2,0))
+		meta:set_float("water", math.max(meta:get_float("water") - 0.2,0))
 		for i = 1, #positions do
 			local position = positions[i]
 			local node = minetest.get_node(position)
-			local iterations = 0
+			local fert_iterations = 0
+			local water_iterations = 0
 			if node.name == "farming:fertilizer_bin" then
-				while meta:get_float("fertilizer") < 100 and node.param2 > 0 and iterations < 4 do
+				while meta:get_float("fertilizer") < 100 and node.param2 > 0 and fert_iterations < 4 do
 					meta:set_float("fertilizer", meta:get_float("fertilizer") + 1)
 					node.param2 = node.param2 - 1
-					iterations = iterations + 1
+					fert_iterations = fert_iterations + 1
 				end
 				minetest.swap_node(position, node)
-				if meta:get_float("fertilizer") >= 100 then break end
+			elseif node.name == "farming:water_tank" then
+				while meta:get_float("water") < 100 and node.param2 > 0 and water_iterations < 4 do
+					print("owo" .. tostring(meta:get_float("water")))
+					meta:set_float("water", meta:get_float("water") + 1)
+					node.param2 = node.param2 - 1
+					water_iterations = water_iterations + 1
+				end
+				minetest.swap_node(position, node)
 			end
 		end
 		minetest.get_meta(pos):set_string("formspec", gen_formspec(pos))

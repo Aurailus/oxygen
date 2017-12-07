@@ -199,14 +199,18 @@ end
 -- Player Damage Function
 --
 function oxygen.processDamage(player)
-	local hp = player:get_hp()
-	if hp > 0 then
-		local item = player:get_wielded_item()
-		if item:get_name() == "oxygen:filter" then
-			item:add_wear(65535/60)
-			player:set_wielded_item(item)
-		else
-			player:set_hp(hp - 1)
+	local invulnerability = tonumber(player:get_attribute("oxytimeout"))
+	if invulnerability > 0 then player:set_attribute("oxytimeout", invulnerability - 1)
+	else
+		local hp = player:get_hp()
+		if hp > 0 then
+			local item = player:get_wielded_item()
+			if item:get_name() == "oxygen:filter" then
+				item:add_wear(65535/60)
+				player:set_wielded_item(item)
+			else
+				player:set_hp(hp - 1)
+			end
 		end
 	end
 end
